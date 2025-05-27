@@ -1,0 +1,60 @@
+﻿@page "/pokazanies"
+@using Microsoft.EntityFrameworkCore
+@using Microsoft.AspNetCore.Components.QuickGrid
+@using Laba10.Data
+@implements IAsyncDisposable
+@inject IDbContextFactory<Laba10.Data.ApplicationDbContext> DbFactory
+@inject NavigationManager NavigationManager
+
+<PageTitle>Показания счетчика</PageTitle>
+
+<h1>Показания счетчика - @SchetchikNumber</h1>
+
+<p>
+    <a href="pokazanies/create?schetchikid=@SchetchikId&abonentid=@AbonentId">Добавить</a>
+</p>
+
+<p>
+    <a href="schetchiks?abonentid=@AbonentId">Возврат к списку счетчиков</a>
+</p>
+
+<QuickGrid Class="table" Items="context.Pokazanies.Where(p => p.SchetchikId == SchetchikId)">
+    <PropertyColumn Title="Дата показания" Property="pokazanie => pokazanie.DataPokazaniya" />
+    <PropertyColumn Title="Значение показания" Property="pokazanie => pokazanie.ZnacheniePokazaniya" />
+
+    <TemplateColumn Context="pokazanie">
+        <a href="@($"pokazanies/edit?pokazanieid={pokazanie.PokazanieId}&abonentid={AbonentId}")">Редактировать</a> |
+        <a href="@($"pokazanies/details?pokazanieid={pokazanie.PokazanieId}&abonentid={AbonentId}")">Просмотр</a> |
+        <a href="@($"pokazanies/delete?pokazanieid={pokazanie.PokazanieId}&abonentid={AbonentId}")">Удалить</a>
+    </TemplateColumn>
+</QuickGrid>
+
+@code {
+    [SupplyParameterFromQuery]
+    public int? AbonentId { get; set; }
+
+    [SupplyParameterFromQuery]
+    public int? SchetchikId { get; set; }
+
+    public string? SchetchikNumber { get; set; }
+
+    private ApplicationDbContext context = default!;
+
+    protected override void OnInitialized()
+    {
+        context = DbFactory.CreateDbContext();
+        if (SchetchikId == null)
+        {
+            NavigationManager.NavigateTo("not found");
+        }
+
+        var schetchik = context.Schetchiks.FirstOrDefault(d => d.SchetchikId == SchetchikId);
+        if (schetchik == null)
+        {
+            NavigationManager.NavigateTo("not found");
+        }
+        SchetchikNumber = schetchik!.NomerSchetchika;
+    }
+
+    public async ValueTask DisposeAsync() => await context.DisposeAsync();
+}

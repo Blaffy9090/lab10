@@ -1,0 +1,61 @@
+﻿@page "/schetchiks"
+@using Microsoft.EntityFrameworkCore
+@using Microsoft.AspNetCore.Components.QuickGrid
+@using Laba10.Data
+@implements IAsyncDisposable
+@inject IDbContextFactory<Laba10.Data.ApplicationDbContext> DbFactory
+@inject NavigationManager NavigationManager
+
+<PageTitle>Счетчики абонента</PageTitle>
+
+<h1>Счетчики абонента - @AbonentFIO</h1>
+
+<p>
+    <a href="schetchiks/create?abonentid=@AbonentId">Добавить</a>
+</p>
+
+<p>
+    <a href="abonents">Возврат к списку абонентов</a>
+</p>
+
+<QuickGrid Class="table" Items="context.Schetchiks.Where(s => s.AbonentId == AbonentId)">
+    <PropertyColumn Title="Номер счетчика" Property="schetchik => schetchik.NomerSchetchika" />
+    <PropertyColumn Title="Тип счетчика" Property="schetchik => schetchik.TipSchetchika" />
+    <PropertyColumn Title="Дата установки" Property="schetchik => schetchik.DataUstanovki" />
+    <PropertyColumn Title="Количество показаний" Property="schetchik => schetchik.Pokazanie!.Count()" />
+
+    <TemplateColumn Context="schetchik">
+        <a href="@($"pokazanies?schetchikid={schetchik.SchetchikId}&abonentid={AbonentId}")">Показания</a> |
+        <a href="@($"schetchiks/edit?schetchikid={schetchik.SchetchikId}")">Редактировать</a> |
+        <a href="@($"schetchiks/details?schetchikid={schetchik.SchetchikId}")">Просмотр</a> |
+        <a href="@($"schetchiks/delete?schetchikid={schetchik.SchetchikId}")">Удалить</a>
+    </TemplateColumn>
+</QuickGrid>
+
+@code {
+    [SupplyParameterFromQuery]
+    public int? AbonentId { get; set; }
+
+    public string? AbonentFIO { get; set; }
+
+    private ApplicationDbContext context = default!;
+
+    protected override void OnInitialized()
+    {
+        context = DbFactory.CreateDbContext();
+        if (AbonentId == null)
+        {
+            NavigationManager.NavigateTo("not found");
+        }
+
+        var abonent = context.Abonents.FirstOrDefault(d => d.AbonentId == AbonentId);
+        if (abonent == null)
+        {
+            NavigationManager.NavigateTo("not found");
+        }
+        AbonentFIO = abonent!.Familiya + " " + abonent!.Imya + " " + abonent!.Otchestvo;
+
+    }
+
+    public async ValueTask DisposeAsync() => await context.DisposeAsync();
+}

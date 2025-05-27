@@ -1,0 +1,64 @@
+﻿@page "/pokazanies/delete"
+@using Microsoft.EntityFrameworkCore
+@using Laba10.Data
+@inject IDbContextFactory<Laba10.Data.ApplicationDbContext> DbFactory
+@inject NavigationManager NavigationManager
+
+<PageTitle>Удалить</PageTitle>
+
+<h1>Удалить</h1>
+
+<p>Вы уверены, что хотите удалить счетчик?</p>
+<div>
+    <hr />
+    @if (pokazanie is null)
+    {
+        <p><em>Loading...</em></p>
+    }
+    else {
+        <dl class="row">
+            <dt class="col-sm-2">Дата показания</dt>
+            <dd class="col-sm-10">@pokazanie.DataPokazaniya</dd>
+        </dl>
+        <dl class="row">
+            <dt class="col-sm-2">Значение показания</dt>
+            <dd class="col-sm-10">@pokazanie.ZnacheniePokazaniya</dd>
+        </dl>
+        <EditForm method="post" Model="pokazanie" OnValidSubmit="DeletePokazanie" FormName="delete" Enhance>
+            <button type="submit" class="btn btn-danger" disabled="@(pokazanie is null)">Удалить</button> |
+            <a href="@($"/pokazanies?schetchikid={pokazanie!.SchetchikId}&abonentid={AbonentId}")">Возврат к списку показаний</a>
+        </EditForm>
+    }
+</div>
+
+@code {
+    private Pokazanie? pokazanie;
+
+    [SupplyParameterFromQuery]
+    public int? AbonentId { get; set; }
+
+
+    private int SchetchikId { get; set; }
+
+    [SupplyParameterFromQuery]
+    private int PokazanieId { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = DbFactory.CreateDbContext();
+        pokazanie = await context.Pokazanies.FirstOrDefaultAsync(m => m.PokazanieId == PokazanieId);
+
+        if (pokazanie is null)
+        {
+            NavigationManager.NavigateTo("notfound");
+        }
+    }
+
+    private async Task DeletePokazanie()
+    {
+        using var context = DbFactory.CreateDbContext();
+        context.Pokazanies.Remove(pokazanie!);
+        await context.SaveChangesAsync();
+        NavigationManager.NavigateTo($"/pokazanies?schetchikid={pokazanie?.SchetchikId}&abonentid={AbonentId}");
+    }
+}

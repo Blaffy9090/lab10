@@ -1,0 +1,49 @@
+﻿@page "/schetchiks/details"
+@using Microsoft.EntityFrameworkCore
+@using Laba10.Data
+@inject IDbContextFactory<Laba10.Data.ApplicationDbContext> DbFactory
+@inject NavigationManager NavigationManager
+
+<PageTitle>Просмотр</PageTitle>
+
+<h1>Просмотр</h1>
+
+<div>
+    <hr />
+    @if (schetchik is null)
+    {
+        <p><em>Loading...</em></p>
+    }
+    else {
+        <dl class="row">
+            <dt class="col-sm-2">Номер счетчика</dt>
+            <dd class="col-sm-10">@schetchik.NomerSchetchika</dd>
+            <dt class="col-sm-2">Тип счетчика</dt>
+            <dd class="col-sm-10">@schetchik.TipSchetchika</dd>
+            <dt class="col-sm-2">Дата установки</dt>
+            <dd class="col-sm-10">@schetchik.DataUstanovki</dd>
+        </dl>
+        <div>
+            <a href="@($"/schetchiks/edit?schetchikid={schetchik.SchetchikId}")">Редактировать</a> |
+            <a href="@($"/schetchiks?abonentid="+schetchik.AbonentId.ToString())">Возврат к списку счетчиков</a>
+        </div>
+    }
+</div>
+
+@code {
+    private Schetchik? schetchik;
+
+    [SupplyParameterFromQuery]
+    private int SchetchikId { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = DbFactory.CreateDbContext();
+        schetchik = await context.Schetchiks.FirstOrDefaultAsync(m => m.SchetchikId == SchetchikId);
+
+        if (schetchik is null)
+        {
+            NavigationManager.NavigateTo("notfound");
+        }
+    }
+}

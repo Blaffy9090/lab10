@@ -1,0 +1,70 @@
+﻿@page "/schetchiks/create"
+@using Microsoft.EntityFrameworkCore
+@using Laba10.Data
+@inject IDbContextFactory<Laba10.Data.ApplicationDbContext> DbFactory
+@inject NavigationManager NavigationManager
+
+<PageTitle>Создать</PageTitle>
+
+<h1>Создать</h1>
+
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <EditForm method="post" Model="Schetchik" OnValidSubmit="AddSchetchik" FormName="create" Enhance>
+            <DataAnnotationsValidator />
+            <ValidationSummary class="text-danger" role="alert"/>
+            <div class="mb-3">
+                <label for="nomerschetchika" class="form-label">Номер счетчика:</label> 
+                <InputText id="nomerschetchika" @bind-Value="Schetchik.NomerSchetchika" class="form-control" /> 
+                <ValidationMessage For="() => Schetchik.NomerSchetchika" class="text-danger" /> 
+            </div>        
+            <div class="mb-3">
+                <label for="tipschetchika" class="form-label">Типа счетчика:</label> 
+                <InputText id="tipschetchika" @bind-Value="Schetchik.TipSchetchika" class="form-control" /> 
+                <ValidationMessage For="() => Schetchik.TipSchetchika" class="text-danger" /> 
+            </div>        
+            <div class="mb-3">
+                <label for="dataustanovki" class="form-label">Дата установки:</label> 
+                <InputDate id="dataustanovki" @bind-Value="Schetchik.DataUstanovki" class="form-control" /> 
+                <ValidationMessage For="() => Schetchik.DataUstanovki" class="text-danger" /> 
+            </div>        
+            <div class="mb-3">
+                <input type="hidden" name="Schetchik.AbonentId" @bind="Schetchik.AbonentId" class="form-control">
+            </div>        
+            <button type="submit" class="btn btn-primary">Добавить</button>
+        </EditForm>
+    </div>
+</div>
+
+<div>
+    <a href="/schetchiks?abonentid=@AbonentId">Возврат к списку счетчиков</a>
+</div>
+
+@code {
+    [SupplyParameterFromQuery]
+    public int? AbonentId { get; set; }
+
+    [SupplyParameterFromForm]
+    private Schetchik Schetchik { get; set; } = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = DbFactory.CreateDbContext();
+
+        if (AbonentId == null)
+        {
+            NavigationManager.NavigateTo("not found");
+        }
+        Schetchik.AbonentId = AbonentId ?? 0;
+    }
+
+    // To protect from overposting attacks, see https://learn.microsoft.com/aspnet/core/blazor/forms/#mitigate-overposting-attacks.
+    private async Task AddSchetchik()
+    {
+        using var context = DbFactory.CreateDbContext();
+        context.Schetchiks.Add(Schetchik);
+        await context.SaveChangesAsync();
+        NavigationManager.NavigateTo("/schetchiks?abonentid=" + AbonentId.ToString());
+    }
+}

@@ -1,0 +1,68 @@
+﻿@page "/pokazanies/create"
+@using Microsoft.EntityFrameworkCore
+@using Laba10.Data
+@inject IDbContextFactory<Laba10.Data.ApplicationDbContext> DbFactory
+@inject NavigationManager NavigationManager
+
+<PageTitle>Создать</PageTitle>
+
+<h1>Создать</h1>
+
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <EditForm method="post" Model="Pokazanie" OnValidSubmit="AddPokazanie" FormName="create" Enhance>
+            <DataAnnotationsValidator />
+            <ValidationSummary class="text-danger" role="alert"/>
+            <div class="mb-3">
+                <label for="datapokazaniya" class="form-label">Дата показания:</label> 
+                <InputDate id="datapokazaniya" @bind-Value="Pokazanie.DataPokazaniya" class="form-control" /> 
+                <ValidationMessage For="() => Pokazanie.DataPokazaniya" class="text-danger" /> 
+            </div>        
+            <div class="mb-3">
+                <label for="znacheniepokazaniya" class="form-label">Значение показания:</label> 
+                <InputNumber id="znacheniepokazaniya" @bind-Value="Pokazanie.ZnacheniePokazaniya" class="form-control" /> 
+                <ValidationMessage For="() => Pokazanie.ZnacheniePokazaniya" class="text-danger" /> 
+            </div>        
+            <div class="mb-3">
+                <input type="hidden" name="Pokazanie.SchetchikId" @bind="Pokazanie.SchetchikId" class="form-control">
+            </div>        
+            <button type="submit" class="btn btn-primary">Добавить</button>
+        </EditForm>
+    </div>
+</div>
+
+<div>
+    <a href="/pokazanies?schetchikid=@SchetchikId&abonentid=@AbonentId">Возврат к списку показаний</a>
+</div>
+
+@code {
+    [SupplyParameterFromQuery]
+    public int? AbonentId { get; set; }
+
+    [SupplyParameterFromQuery]
+    public int? SchetchikId { get; set; }
+
+    [SupplyParameterFromForm]
+    private Pokazanie Pokazanie { get; set; } = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = DbFactory.CreateDbContext();
+
+        if (SchetchikId == null)
+        {
+            NavigationManager.NavigateTo("not found");
+        }
+        Pokazanie.SchetchikId = SchetchikId ?? 0;
+    }
+
+    // To protect from overposting attacks, see https://learn.microsoft.com/aspnet/core/blazor/forms/#mitigate-overposting-attacks.
+    private async Task AddPokazanie()
+    {
+        using var context = DbFactory.CreateDbContext();
+        context.Pokazanies.Add(Pokazanie);
+        await context.SaveChangesAsync();
+        NavigationManager.NavigateTo($"/pokazanies?schetchikid={SchetchikId}&abonentid={AbonentId}");
+    }
+}

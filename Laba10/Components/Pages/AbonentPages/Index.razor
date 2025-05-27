@@ -1,0 +1,41 @@
+﻿@page "/abonents"
+@using Microsoft.EntityFrameworkCore
+@using Microsoft.AspNetCore.Components.QuickGrid
+@using Laba10.Data
+@using Laba10.Data
+@implements IAsyncDisposable
+@inject IDbContextFactory<Laba10.Data.ApplicationDbContext> DbFactory
+
+<PageTitle>Абоненты</PageTitle>
+
+<h1>Абоненты</h1>
+
+<p>
+    <a href="abonents/create">Добавить</a>
+</p>
+
+<QuickGrid Class="table" Items="context.Abonents">
+    <PropertyColumn Title="Фамилия" Property="abonent => abonent.Familiya" />
+    <PropertyColumn Title="Имя" Property="abonent => abonent.Imya" />
+    <PropertyColumn Title="Отчество" Property="abonent => abonent.Otchestvo" />
+    <PropertyColumn Title="Адрес" Property="abonent => abonent.Adres" />
+    <PropertyColumn Title="Телефон" Property="abonent => abonent.Telefon" />
+    <PropertyColumn Title="Количество счетчиков" Property="abonent => abonent.Schetchiks!.Count()" />
+    <TemplateColumn Context="abonent">
+        <a href="@($"schetchiks?abonentid={abonent.AbonentId}")">Счетчики</a> |
+        <a href="@($"abonents/edit?abonentid={abonent.AbonentId}")">Редактировать</a> |
+        <a href="@($"abonents/details?abonentid={abonent.AbonentId}")">Просмотр</a> |
+        <a href="@($"abonents/delete?abonentid={abonent.AbonentId}")">Удалить</a>
+    </TemplateColumn>
+</QuickGrid>
+
+@code {
+    private ApplicationDbContext context = default!;
+
+    protected override void OnInitialized()
+    {
+        context = DbFactory.CreateDbContext();
+    }
+
+    public async ValueTask DisposeAsync() => await context.DisposeAsync();
+}
