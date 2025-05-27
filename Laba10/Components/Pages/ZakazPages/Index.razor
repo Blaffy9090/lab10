@@ -1,0 +1,71 @@
+﻿@* Index.razor *@
+@page "/zakazy"
+@using Microsoft.EntityFrameworkCore
+@using Microsoft.AspNetCore.Components.QuickGrid
+@using Laba10.Data
+@implements IAsyncDisposable
+@inject IDbContextFactory<Laba10.Data.ApplicationDbContext> DbFactory
+
+<PageTitle>Заказы</PageTitle>
+
+<h1>Заказы</h1>
+
+@if (TovarId != 0)
+{
+    <p>Товар: @CurrentTovar?.NazvanieTovara</p>
+}
+
+<p>
+    <a href="@($"/zakazy/create{(TovarId != 0 ? $"?tovarId={TovarId}" : "")}")">Добавить заказ</a>
+</p>
+
+<QuickGrid Class="table" Items="zakazy">
+    <PropertyColumn Title="Товар" Property="z => z.Tovar!.NazvanieTovara"/>
+    <PropertyColumn Title="Количество" Property="z => z.Kolichestvo"/>
+    <PropertyColumn Title="Дата заказа" Format="d" Property="z => z.DataZakaza" />
+    <PropertyColumn Title="Общая стоимость" Format="C" Property="z => z.ObshayaStoimost" />
+    <TemplateColumn Context="z">
+        <a href="@($"zakazy/edit?zakazid={z.ZakazId}")">Редактировать</a> |
+        <a href="@($"zakazy/details?zakazid={z.ZakazId}")">Просмотр</a> |
+        <a href="@($"zakazy/delete?zakazid={z.ZakazId}")">Удалить</a>
+    </TemplateColumn>
+</QuickGrid>
+
+@if (TovarId == 0)
+{
+    <div>
+        <a href="/tovary">Назад к товарам</a>
+    </div>
+}
+
+@code {
+    private ApplicationDbContext context = default!;
+    private List<Zakaz> zakazy = new();
+    private Tovar? CurrentTovar;
+    
+    [SupplyParameterFromQuery]
+    private int TovarId { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        context = DbFactory.CreateDbContext();
+        
+        if (TovarId != 0)
+        {
+            zakazy = await context.Zakazy
+                .Where(z => z.TovarId == TovarId)
+                .Include(z => z.Tovar)
+                .ToListAsync();
+                
+            CurrentTovar = await context.Tovary.FindAsync(TovarId);
+        }
+        else
+        {
+            zakazy = await context.Zakazy
+                .Include(z => z.Tovar)
+                .ToListAsync();
+        }
+    }
+
+    public async ValueTask DisposeAsync() => await context.DisposeAsync();
+}

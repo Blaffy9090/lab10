@@ -1,0 +1,40 @@
+﻿@* Index.razor *@
+@page "/kategorii"
+@using Microsoft.EntityFrameworkCore
+@using Microsoft.AspNetCore.Components.QuickGrid
+@using Laba10.Data
+@implements IAsyncDisposable
+@inject IDbContextFactory<Laba10.Data.ApplicationDbContext> DbFactory
+
+<PageTitle>Категории товаров</PageTitle>
+
+<h1>Категории товаров</h1>
+
+<p>
+    <a href="kategorii/create">Добавить категорию</a>
+</p>
+
+<QuickGrid Class="table" Items="kategorii">
+    <PropertyColumn Title="Название" Property="k => k.NazvanieKategorii" />
+    <PropertyColumn Title="Количество товаров" Property="k => k.Tovary!.Count" />
+    <TemplateColumn Context="k">
+        <a href="@($"/kategorii/edit?kategoriyaid={k.KategoriyaTovaraId}")">Редактировать</a> |
+        <a href="@($"/kategorii/details?kategoriyaid={k.KategoriyaTovaraId}")">Просмотр</a> |
+        <a href="@($"/kategorii/delete?kategoriyaid={k.KategoriyaTovaraId}")">Удалить</a>
+    </TemplateColumn>
+</QuickGrid>
+
+@code {
+    private ApplicationDbContext context = default!;
+    private List<KategoriyaTovara> kategorii = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        context = DbFactory.CreateDbContext();
+        kategorii = await context.KategoriiTovarov
+            .Include(k => k.Tovary)
+            .ToListAsync();
+    }
+
+    public async ValueTask DisposeAsync() => await context.DisposeAsync();
+}

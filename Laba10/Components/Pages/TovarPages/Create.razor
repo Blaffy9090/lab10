@@ -1,0 +1,75 @@
+﻿@* Create.razor *@
+@page "/tovary/create"
+@using Microsoft.EntityFrameworkCore
+@using Laba10.Data
+@inject IDbContextFactory<Laba10.Data.ApplicationDbContext> DbFactory
+@inject NavigationManager NavigationManager
+
+<PageTitle>Создать товар</PageTitle>
+
+<h1>Создать товар</h1>
+
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <EditForm method="post" Model="Tovar" OnValidSubmit="AddTovar" FormName="create" Enhance>
+            <DataAnnotationsValidator />
+            <ValidationSummary class="text-danger" role="alert" />
+
+            <div class="mb-3">
+                <label for="nazvanie" class="form-label">Название:</label>
+                <InputText id="nazvanie" @bind-Value="Tovar.NazvanieTovara" class="form-control" />
+                <ValidationMessage For="() => Tovar.NazvanieTovara" class="text-danger" />
+            </div>
+
+            <div class="mb-3">
+                <label for="opisanie" class="form-label">Описание:</label>
+                <InputTextArea id="opisanie" @bind-Value="Tovar.OpisanieTovara" class="form-control" />
+                <ValidationMessage For="() => Tovar.OpisanieTovara" class="text-danger" />
+            </div>
+
+            <div class="mb-3">
+                <label for="cena" class="form-label">Цена:</label>
+                <InputNumber id="cena" @bind-Value="Tovar.Cena" class="form-control" />
+                <ValidationMessage For="() => Tovar.Cena" class="text-danger" />
+            </div>
+
+            <div class="mb-3">
+                <label for="kategoriya" class="form-label">Категория:</label>
+                <InputSelect id="kategoriya" @bind-Value="Tovar.KategoriyaTovaraId" class="form-control">
+                    @foreach (var k in Kategorii)
+                    {
+                        <option value="@k.KategoriyaTovaraId">@k.NazvanieKategorii</option>
+                    }
+                </InputSelect>
+            </div>
+
+            <button type="submit" class="btn btn-primary">Создать</button>
+        </EditForm>
+    </div>
+</div>
+
+<div>
+    <a href="/tovary">Назад к списку</a>
+</div>
+
+@code {
+    [SupplyParameterFromForm]
+    private Tovar Tovar { get; set; } = new();
+
+    private List<KategoriyaTovara> Kategorii = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = DbFactory.CreateDbContext();
+        Kategorii = await context.KategoriiTovarov.ToListAsync();
+    }
+
+    private async Task AddTovar()
+    {
+        using var context = DbFactory.CreateDbContext();
+        context.Tovary.Add(Tovar);
+        await context.SaveChangesAsync();
+        NavigationManager.NavigateTo("/tovary");
+    }
+}

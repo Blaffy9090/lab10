@@ -1,0 +1,45 @@
+﻿@* Index.razor *@
+@page "/tovary"
+@using Microsoft.EntityFrameworkCore
+@using Microsoft.AspNetCore.Components.QuickGrid
+@using Laba10.Data
+@implements IAsyncDisposable
+@inject IDbContextFactory<Laba10.Data.ApplicationDbContext> DbFactory
+
+<PageTitle>Товары</PageTitle>
+
+<h1>Список товаров</h1>
+
+<p>
+    <a href="tovary/create">Добавить товар</a>
+</p>
+
+<QuickGrid Class="table" Items="tovary">
+    <PropertyColumn Title="Название" Property="t => t.NazvanieTovara" />
+    <PropertyColumn Title="Описание" Property="t => t.OpisanieTovara" />
+    <PropertyColumn Title="Цена" Format="C" Property="t => t.Cena" />
+    <PropertyColumn Title="Категория" Property="t => t.KategoriyaTovara!.NazvanieKategorii" />
+    <PropertyColumn Title="Заказов" Property="t => t.Zakazy!.Count" />
+    <TemplateColumn Context="t">
+        <a href="@($"/zakazy?tovarId={t.TovarId}")">Заказы</a> |
+        <a href="@($"/tovary/edit?tovarid={t.TovarId}")">Редактировать</a> |
+        <a href="@($"/tovary/details?tovarid={t.TovarId}")">Просмотр</a> |
+        <a href="@($"/tovary/delete?tovarid={t.TovarId}")">Удалить</a>
+    </TemplateColumn>
+</QuickGrid>
+
+@code {
+    private ApplicationDbContext context = default!;
+    private List<Tovar> tovary = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        context = DbFactory.CreateDbContext();
+        tovary = await context.Tovary
+            .Include(t => t.KategoriyaTovara)
+            .Include(t => t.Zakazy)
+            .ToListAsync();
+    }
+
+    public async ValueTask DisposeAsync() => await context.DisposeAsync();
+}

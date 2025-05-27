@@ -1,0 +1,99 @@
+﻿@* Edit.razor *@
+@page "/zakazy/edit"
+@using Microsoft.EntityFrameworkCore
+@using Laba10.Data
+@inject IDbContextFactory<Laba10.Data.ApplicationDbContext> DbFactory
+@inject NavigationManager NavigationManager
+
+<PageTitle>Редактировать заказ</PageTitle>
+
+<h1>Редактировать заказ</h1>
+
+<hr />
+@if (Zakaz is null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <div class="row">
+        <div class="col-md-4">
+            <EditForm method="post" Model="Zakaz" OnValidSubmit="UpdateZakaz" FormName="edit" Enhance>
+                <DataAnnotationsValidator />
+                <ValidationSummary role="alert" />
+                <input type="hidden" name="Zakaz.ZakazId" value="@Zakaz.ZakazId" />
+
+                <div class="mb-3">
+                    <label for="tovar" class="form-label">Товар:</label>
+                    <InputSelect id="tovar" @bind-Value="Zakaz.TovarId" class="form-control">
+                        @foreach (var tovar in Tovary)
+                        {
+                            <option value="@tovar.TovarId">@tovar.NazvanieTovara</option>
+                        }
+                    </InputSelect>
+                </div>
+
+                <div class="mb-3">
+                    <label for="kolichestvo" class="form-label">Количество:</label>
+                    <InputNumber id="kolichestvo" @bind-Value="Zakaz.Kolichestvo" class="form-control" />
+                    <ValidationMessage For="() => Zakaz.Kolichestvo" class="text-danger" />
+                </div>
+
+                <div class="mb-3">
+                    <label for="dataZakaza" class="form-label">Дата заказа:</label>
+                    <InputDate id="dataZakaza" @bind-Value="Zakaz.DataZakaza" class="form-control" />
+                    <ValidationMessage For="() => Zakaz.DataZakaza" class="text-danger" />
+                </div>
+
+                <button type="submit" class="btn btn-primary">Сохранить</button>
+            </EditForm>
+        </div>
+    </div>
+}
+
+<div>
+    <a href="/zakazy">Возврат к списку заказов</a>
+</div>
+
+@code {
+    [SupplyParameterFromQuery]
+    private int ZakazId { get; set; }
+
+    [SupplyParameterFromForm]
+    private Zakaz? Zakaz { get; set; }
+
+    private List<Tovar> Tovary = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = DbFactory.CreateDbContext();
+        Zakaz ??= await context.Zakazy
+            .FirstOrDefaultAsync(z => z.ZakazId == ZakazId);
+
+        Tovary = await context.Tovary.ToListAsync();
+
+        if (Zakaz is null) NavigationManager.NavigateTo("notfound");
+    }
+
+    private async Task UpdateZakaz()
+    {
+        using var context = DbFactory.CreateDbContext();
+        context.Attach(Zakaz!).State = EntityState.Modified;
+
+        try
+        {
+            await context.SaveChangesAsync();
+            NavigationManager.NavigateTo($"/zakazy?tovarId={Zakaz.TovarId}");
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+            if (!ZakazExists(Zakaz!.ZakazId)) NavigationManager.NavigateTo("notfound");
+        }
+    }
+
+    private bool ZakazExists(int zakazid)
+    {
+        using var context = DbFactory.CreateDbContext();
+        return context.Zakazy.Any(z => z.ZakazId == zakazid);
+    }
+}

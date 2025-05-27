@@ -1,0 +1,57 @@
+﻿@* Delete.razor *@
+@page "/kategorii/delete"
+@using Microsoft.EntityFrameworkCore
+@using Laba10.Data
+@inject IDbContextFactory<Laba10.Data.ApplicationDbContext> DbFactory
+@inject NavigationManager NavigationManager
+
+<PageTitle>Удалить категорию</PageTitle>
+
+<h1>Удалить категорию</h1>
+
+<p>Вы уверены, что хотите удалить эту категорию?</p>
+<div>
+    <hr />
+    @if (kategoriya is null)
+    {
+        <p><em>Loading...</em></p>
+    }
+    else {
+        <dl class="row">
+            <dt class="col-sm-2">Название</dt>
+            <dd class="col-sm-10">@kategoriya.NazvanieKategorii</dd>
+            <dt class="col-sm-2">Товаров в категории</dt>
+            <dd class="col-sm-10">@kategoriya.Tovary?.Count</dd>
+        </dl>
+        
+        <EditForm method="post" Model="kategoriya" OnValidSubmit="DeleteKategoriya" FormName="delete" Enhance>
+            <button type="submit" class="btn btn-danger">Удалить</button> |
+            <a href="/kategorii">Назад к списку</a>
+        </EditForm>
+    }
+</div>
+
+@code {
+    private KategoriyaTovara? kategoriya;
+
+    [SupplyParameterFromQuery]
+    private int KategoriyaId { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = DbFactory.CreateDbContext();
+        kategoriya = await context.KategoriiTovarov
+            .Include(k => k.Tovary)
+            .FirstOrDefaultAsync(k => k.KategoriyaTovaraId == KategoriyaId);
+
+        if (kategoriya is null) NavigationManager.NavigateTo("notfound");
+    }
+
+    private async Task DeleteKategoriya()
+    {
+        using var context = DbFactory.CreateDbContext();
+        context.KategoriiTovarov.Remove(kategoriya!);
+        await context.SaveChangesAsync();
+        NavigationManager.NavigateTo("/kategorii");
+    }
+}

@@ -1,0 +1,56 @@
+﻿@* Details.razor *@
+@page "/kategorii/details"
+@using Microsoft.EntityFrameworkCore
+@using Laba10.Data
+@inject IDbContextFactory<Laba10.Data.ApplicationDbContext> DbFactory
+@inject NavigationManager NavigationManager
+
+<PageTitle>Детали категории</PageTitle>
+
+<h1>Детали категории</h1>
+
+<div>
+    <hr />
+    @if (kategoriya is null)
+    {
+        <p><em>Loading...</em></p>
+    }
+    else {
+        <dl class="row">
+            <dt class="col-sm-2">Название</dt>
+            <dd class="col-sm-10">@kategoriya.NazvanieKategorii</dd>
+            <dt class="col-sm-2">Количество товаров</dt>
+            <dd class="col-sm-10">@kategoriya.Tovary?.Count</dd>
+        </dl>
+        
+        <h3>Товары в категории:</h3>
+        <ul>
+            @foreach (var tovar in kategoriya.Tovary!)
+            {
+                <li>@tovar.NazvanieTovara</li>
+            }
+        </ul>
+        
+        <div>
+            <a href="@($"/kategorii/edit?kategoriyaid={kategoriya.KategoriyaTovaraId}")">Редактировать</a> |
+            <a href="/kategorii">Назад к списку</a>
+        </div>
+    }
+</div>
+
+@code {
+    private KategoriyaTovara? kategoriya;
+
+    [SupplyParameterFromQuery]
+    private int KategoriyaId { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = DbFactory.CreateDbContext();
+        kategoriya = await context.KategoriiTovarov
+            .Include(k => k.Tovary)
+            .FirstOrDefaultAsync(k => k.KategoriyaTovaraId == KategoriyaId);
+
+        if (kategoriya is null) NavigationManager.NavigateTo("notfound");
+    }
+}

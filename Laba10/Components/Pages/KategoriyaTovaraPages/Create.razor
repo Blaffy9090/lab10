@@ -1,0 +1,43 @@
+﻿@* Create.razor *@
+@page "/kategorii/create"
+@using Microsoft.EntityFrameworkCore
+@using Laba10.Data
+@inject IDbContextFactory<Laba10.Data.ApplicationDbContext> DbFactory
+@inject NavigationManager NavigationManager
+
+<PageTitle>Создать категорию</PageTitle>
+
+<h1>Создать категорию</h1>
+
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <EditForm method="post" Model="Kategoriya" OnValidSubmit="AddKategoriya" FormName="create" Enhance>
+            <DataAnnotationsValidator />
+            <ValidationSummary class="text-danger" role="alert" />
+            <div class="mb-3">
+                <label for="nazvanie" class="form-label">Название категории:</label>
+                <InputText id="nazvanie" @bind-Value="Kategoriya.NazvanieKategorii" class="form-control" />
+                <ValidationMessage For="() => Kategoriya.NazvanieKategorii" class="text-danger" />
+            </div>
+            <button type="submit" class="btn btn-primary">Создать</button>
+        </EditForm>
+    </div>
+</div>
+
+<div>
+    <a href="/kategorii">Назад к списку категорий</a>
+</div>
+
+@code {
+    [SupplyParameterFromForm]
+    private KategoriyaTovara Kategoriya { get; set; } = new();
+
+    private async Task AddKategoriya()
+    {
+        using var context = DbFactory.CreateDbContext();
+        context.KategoriiTovarov.Add(Kategoriya);
+        await context.SaveChangesAsync();
+        NavigationManager.NavigateTo("/kategorii");
+    }
+}

@@ -1,0 +1,65 @@
+﻿@* Edit.razor *@
+@page "/kategorii/edit"
+@using Microsoft.EntityFrameworkCore
+@using Laba10.Data
+@inject IDbContextFactory<Laba10.Data.ApplicationDbContext> DbFactory
+@inject NavigationManager NavigationManager
+
+<PageTitle>Редактировать категорию</PageTitle>
+
+<h1>Редактировать категорию</h1>
+
+<hr />
+@if (Kategoriya is null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <div class="row">
+        <div class="col-md-4">
+            <EditForm method="post" Model="Kategoriya" OnValidSubmit="UpdateKategoriya" FormName="edit" Enhance>
+                <DataAnnotationsValidator />
+                <ValidationSummary role="alert" />
+                <input type="hidden" name="Kategoriya.KategoriyaTovaraId" value="@Kategoriya.KategoriyaTovaraId" />
+
+                <div class="mb-3">
+                    <label for="nazvanie" class="form-label">Название:</label>
+                    <InputText id="nazvanie" @bind-Value="Kategoriya.NazvanieKategorii" class="form-control" />
+                    <ValidationMessage For="() => Kategoriya.NazvanieKategorii" class="text-danger" />
+                </div>
+
+                <button type="submit" class="btn btn-primary">Сохранить</button>
+            </EditForm>
+        </div>
+    </div>
+}
+
+<div>
+    <a href="/kategorii">Назад к списку</a>
+</div>
+
+@code {
+    [SupplyParameterFromQuery]
+    private int KategoriyaId { get; set; }
+
+    [SupplyParameterFromForm]
+    private KategoriyaTovara? Kategoriya { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = DbFactory.CreateDbContext();
+        Kategoriya ??= await context.KategoriiTovarov
+            .FirstOrDefaultAsync(k => k.KategoriyaTovaraId == KategoriyaId);
+
+        if (Kategoriya is null) NavigationManager.NavigateTo("notfound");
+    }
+
+    private async Task UpdateKategoriya()
+    {
+        using var context = DbFactory.CreateDbContext();
+        context.Attach(Kategoriya!).State = EntityState.Modified;
+        await context.SaveChangesAsync();
+        NavigationManager.NavigateTo("/kategorii");
+    }
+}

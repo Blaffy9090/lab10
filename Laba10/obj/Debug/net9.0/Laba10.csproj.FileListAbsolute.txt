@@ -330,3 +330,13 @@ C:\Users\Hovro\source\repos\Laba10\Laba10\obj\Debug\net9.0\compressed\3gin1ph7ub
 C:\Users\Hovro\source\repos\Laba10\Laba10\obj\Debug\net9.0\compressed\vcanunsxhd-1rs9pz9p1u.gz
 C:\Users\Hovro\source\repos\Laba10\Laba10\bin\Debug\net9.0\Castle.Core.dll
 C:\Users\Hovro\source\repos\Laba10\Laba10\bin\Debug\net9.0\Microsoft.EntityFrameworkCore.Proxies.dll
+C:\Users\user\Documents\repos\Laba10\Laba10\obj\Debug\net9.0\Laba10.csproj.AssemblyReference.cache
+C:\Users\user\Documents\repos\Laba10\Laba10\obj\Debug\net9.0\Laba10.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\user\Documents\repos\Laba10\Laba10\obj\Debug\net9.0\Laba10.AssemblyInfoInputs.cache
+C:\Users\user\Documents\repos\Laba10\Laba10\obj\Debug\net9.0\Laba10.AssemblyInfo.cs
+C:\Users\user\Documents\repos\Laba10\Laba10\obj\Debug\net9.0\Laba10.csproj.CoreCompileInputs.cache
+C:\Users\user\Documents\repos\Laba10\Laba10\obj\Debug\net9.0\Laba10.MvcApplicationPartsAssemblyInfo.cache
+C:\Users\user\Documents\repos\Laba10\Laba10\obj\Debug\net9.0\Laba10.sourcelink.json
+C:\Users\user\Documents\repos\Laba10\Laba10\obj\Debug\net9.0\Laba10.dll
+C:\Users\user\Documents\repos\Laba10\Laba10\obj\Debug\net9.0\refint\Laba10.dll
+C:\Users\user\Documents\repos\Laba10\Laba10\obj\Debug\net9.0\Laba10.pdb

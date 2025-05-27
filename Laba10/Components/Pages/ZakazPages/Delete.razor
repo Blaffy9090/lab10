@@ -1,0 +1,67 @@
+﻿@* Delete.razor *@
+@page "/zakazy/delete"
+@using Microsoft.EntityFrameworkCore
+@using Laba10.Data
+@inject IDbContextFactory<Laba10.Data.ApplicationDbContext> DbFactory
+@inject NavigationManager NavigationManager
+
+<PageTitle>Удалить заказ</PageTitle>
+
+<h1>Удалить заказ</h1>
+
+<p>Вы уверены, что хотите удалить этот заказ?</p>
+<div>
+    <hr />
+    @if (zakaz is null)
+    {
+        <p><em>Loading...</em></p>
+    }
+    else {
+        <dl class="row">
+            <dt class="col-sm-2">Товар</dt>
+            <dd class="col-sm-10">@zakaz.Tovar?.NazvanieTovara</dd>
+            
+            <dt class="col-sm-2">Количество</dt>
+            <dd class="col-sm-10">@zakaz.Kolichestvo</dd>
+            
+            <dt class="col-sm-2">Дата заказа</dt>
+            <dd class="col-sm-10">@zakaz.DataZakaza.ToShortDateString()</dd>
+            
+            <dt class="col-sm-2">Общая стоимость</dt>
+            <dd class="col-sm-10">@zakaz.ObshayaStoimost.ToString("C")</dd>
+        </dl>
+        
+        <EditForm method="post" Model="zakaz" OnValidSubmit="DeleteZakaz" FormName="delete" Enhance>
+            <button type="submit" class="btn btn-danger" disabled="@(zakaz is null)">Удалить</button> |
+            <a href="/zakazy">Возврат к списку заказов</a>
+        </EditForm>
+    }
+</div>
+
+@code {
+    private Zakaz? zakaz;
+    private int TovarId { get; set; }
+
+    [SupplyParameterFromQuery]
+    private int ZakazId { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = DbFactory.CreateDbContext();
+        zakaz = await context.Zakazy
+            .Include(z => z.Tovar)
+            .FirstOrDefaultAsync(z => z.ZakazId == ZakazId);
+
+        TovarId = zakaz?.TovarId ?? 0;
+        
+        if (zakaz is null) NavigationManager.NavigateTo("notfound");
+    }
+
+    private async Task DeleteZakaz()
+    {
+        using var context = DbFactory.CreateDbContext();
+        context.Zakazy.Remove(zakaz!);
+        await context.SaveChangesAsync();
+        NavigationManager.NavigateTo($"/zakazy?tovarId={TovarId}");
+    }
+}

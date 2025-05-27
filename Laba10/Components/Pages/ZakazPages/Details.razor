@@ -1,0 +1,55 @@
+﻿@* Details.razor *@
+@page "/zakazy/details"
+@using Microsoft.EntityFrameworkCore
+@using Laba10.Data
+@inject IDbContextFactory<Laba10.Data.ApplicationDbContext> DbFactory
+@inject NavigationManager NavigationManager
+
+<PageTitle>Детали заказа</PageTitle>
+
+<h1>Детали заказа</h1>
+
+<div>
+    <hr />
+    @if (zakaz is null)
+    {
+        <p><em>Loading...</em></p>
+    }
+    else
+    {
+        <dl class="row">
+            <dt class="col-sm-2">Товар</dt>
+            <dd class="col-sm-10">@zakaz.Tovar?.NazvanieTovara</dd>
+
+            <dt class="col-sm-2">Количество</dt>
+            <dd class="col-sm-10">@zakaz.Kolichestvo</dd>
+
+            <dt class="col-sm-2">Дата заказа</dt>
+            <dd class="col-sm-10">@zakaz.DataZakaza.ToShortDateString()</dd>
+
+            <dt class="col-sm-2">Общая стоимость</dt>
+            <dd class="col-sm-10">@zakaz.ObshayaStoimost.ToString("C")</dd>
+        </dl>
+        <div>
+            <a href="@($"/zakazy/edit?zakazid={zakaz.ZakazId}")">Редактировать</a> |
+            <a href="@($"/zakazy?tovarId={zakaz.TovarId}")">Назад к списку</a>
+        </div>
+    }
+</div>
+
+@code {
+    private Zakaz? zakaz;
+
+    [SupplyParameterFromQuery]
+    private int ZakazId { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = DbFactory.CreateDbContext();
+        zakaz = await context.Zakazy
+            .Include(z => z.Tovar)
+            .FirstOrDefaultAsync(z => z.ZakazId == ZakazId);
+
+        if (zakaz is null) NavigationManager.NavigateTo("notfound");
+    }
+}

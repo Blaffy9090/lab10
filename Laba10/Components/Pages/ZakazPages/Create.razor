@@ -1,0 +1,69 @@
+﻿@* Create.razor *@
+@page "/zakazy/create"
+@using Microsoft.EntityFrameworkCore
+@using Laba10.Data
+@inject IDbContextFactory<ApplicationDbContext> DbFactory
+@inject NavigationManager NavigationManager
+
+<PageTitle>Создать заказ</PageTitle>
+
+<h1>Создать заказ</h1>
+
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <EditForm method="post" Model="Zakaz" OnValidSubmit="AddZakaz" FormName="create" Enhance>
+            <DataAnnotationsValidator />
+            <ValidationSummary class="text-danger" role="alert"/>
+            
+            <div class="mb-3">
+                <label for="tovar" class="form-label">Товар:</label>
+                <InputSelect id="tovar" @bind-Value="Zakaz.TovarId" class="form-control">
+                    @foreach (var tovar in Tovary)
+                    {
+                        <option value="@tovar.TovarId">@tovar.NazvanieTovara</option>
+                    }
+                </InputSelect>
+            </div>
+            
+            <div class="mb-3">
+                <label for="kolichestvo" class="form-label">Количество:</label> 
+                <InputNumber id="kolichestvo" @bind-Value="Zakaz.Kolichestvo" class="form-control" />
+                <ValidationMessage For="() => Zakaz.Kolichestvo" class="text-danger" /> 
+            </div>
+            
+            <div class="mb-3">
+                <label for="dataZakaza" class="form-label">Дата заказа:</label> 
+                <InputDate id="dataZakaza" @bind-Value="Zakaz.DataZakaza" class="form-control" />
+                <ValidationMessage For="() => Zakaz.DataZakaza" class="text-danger" /> 
+            </div>
+            
+            <button type="submit" class="btn btn-primary">Создать</button>
+        </EditForm>
+    </div>
+</div>
+
+<div>
+    <a href="/zakazy">Возврат к списку заказов</a>
+</div>
+
+@code {
+    [SupplyParameterFromForm]
+    private Zakaz Zakaz { get; set; } = new();
+    
+    private List<Tovar> Tovary = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = DbFactory.CreateDbContext();
+        Tovary = await context.Tovary.ToListAsync();
+    }
+
+    private async Task AddZakaz()
+    {
+        using var context = DbFactory.CreateDbContext();
+        context.Zakazy.Add(Zakaz);
+        await context.SaveChangesAsync();
+        NavigationManager.NavigateTo($"/zakazy?tovarId={Zakaz.TovarId}");
+    }
+}
