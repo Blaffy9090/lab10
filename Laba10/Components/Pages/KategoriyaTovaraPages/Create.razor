@@ -30,8 +30,7 @@
 </div>
 
 @code {
-    [SupplyParameterFromForm]
-    private KategoriyaTovara Kategoriya { get; set; } = new();
+    private KategoriyaTovara Kategoriya { get; set; } = new KategoriyaTovara();
 
     private async Task AddKategoriya()
     {

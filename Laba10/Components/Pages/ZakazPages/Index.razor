@@ -23,7 +23,7 @@ else{
     </p>
 }
 
-<QuickGrid Class="table" Items="(IQueryable<Zakaz>)zakazy">
+<QuickGrid Class="table" Items="zakazy.AsQueryable()">
     <PropertyColumn Title="Товар" Property="@(z => z.Tovar!.NazvanieTovara)" />
     <PropertyColumn Title="Количество" Property="@(z => z.Kolichestvo)" />
     <PropertyColumn Title="Дата заказа" Format="d" Property="@(z => z.DataZakaza)" />
