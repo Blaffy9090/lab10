@@ -14,7 +14,7 @@
     <a href="kategorii/create">Добавить категорию</a>
 </p>
 
-<QuickGrid Class="table" Items="kategorii">
+<QuickGrid Class="table" Items="(IQueryable<KategoriyaTovara>)kategorii">
     <PropertyColumn Title="Название" Property="k => k.NazvanieKategorii" />
     <PropertyColumn Title="Количество товаров" Property="k => k.Tovary!.Count" />
     <TemplateColumn Context="k">

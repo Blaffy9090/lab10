@@ -14,7 +14,7 @@
     <a href="tovary/create">Добавить товар</a>
 </p>
 
-<QuickGrid Class="table" Items="tovary">
+<QuickGrid Class="table" Items="(IQueryable<Tovar>)tovary">
     <PropertyColumn Title="Название" Property="t => t.NazvanieTovara" />
     <PropertyColumn Title="Описание" Property="t => t.OpisanieTovara" />
     <PropertyColumn Title="Цена" Format="C" Property="t => t.Cena" />

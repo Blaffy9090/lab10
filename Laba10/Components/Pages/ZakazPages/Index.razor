@@ -13,17 +13,21 @@
 @if (TovarId != 0)
 {
     <p>Товар: @CurrentTovar?.NazvanieTovara</p>
+    <p>
+        <a href="@($"zakazy/create?tovarId={TovarId}")">Добавить заказ</a>
+    </p>
+}
+else{
+    <p>
+        <a href="@($"zakazy/create")">Добавить заказ</a>
+    </p>
 }
 
-<p>
-    <a href="@($"/zakazy/create{(TovarId != 0 ? $"?tovarId={TovarId}" : "")}")">Добавить заказ</a>
-</p>
-
-<QuickGrid Class="table" Items="zakazy">
-    <PropertyColumn Title="Товар" Property="z => z.Tovar!.NazvanieTovara"/>
-    <PropertyColumn Title="Количество" Property="z => z.Kolichestvo"/>
-    <PropertyColumn Title="Дата заказа" Format="d" Property="z => z.DataZakaza" />
-    <PropertyColumn Title="Общая стоимость" Format="C" Property="z => z.ObshayaStoimost" />
+<QuickGrid Class="table" Items="(IQueryable<Zakaz>)zakazy">
+    <PropertyColumn Title="Товар" Property="@(z => z.Tovar!.NazvanieTovara)" />
+    <PropertyColumn Title="Количество" Property="@(z => z.Kolichestvo)" />
+    <PropertyColumn Title="Дата заказа" Format="d" Property="@(z => z.DataZakaza)" />
+    <PropertyColumn Title="Общая стоимость" Format="C" Property="@(z => z.ObshayaStoimost)" />
     <TemplateColumn Context="z">
         <a href="@($"zakazy/edit?zakazid={z.ZakazId}")">Редактировать</a> |
         <a href="@($"zakazy/details?zakazid={z.ZakazId}")">Просмотр</a> |
@@ -40,7 +44,7 @@
 
 @code {
     private ApplicationDbContext context = default!;
-    private List<Zakaz> zakazy = new();
+    private List<Zakaz> zakazy = new List<Zakaz>();
     private Tovar? CurrentTovar;
     
     [SupplyParameterFromQuery]
